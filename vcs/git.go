@@ -3,7 +3,6 @@ package vcs
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -140,11 +139,9 @@ func (g *GitDriver) addAuth(url string) (string, error) {
 		}
 		if !(strings.HasSuffix(u.Scheme, "https") || strings.HasSuffix(u.Scheme, "http")) {
 			// not a https or http repo, shouldn't have username and password
-			return "", errors.New(
-				fmt.Sprintf(
-					"%s is not an http or https repository, shouldn't have username or password",
-					url,
-				),
+			return "", fmt.Errorf(
+				"%s is not an http or https repository, shouldn't have username or password",
+				url,
 			)
 		}
 		u.User = net_url.UserPassword(g.Username, g.Password)
