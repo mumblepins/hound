@@ -83,13 +83,9 @@ func unregisterShutdownSignal(shutdownCh chan os.Signal) {
 	signal.Stop(shutdownCh)
 }
 
-// TODO: Automatically increment this when building a release
 func getVersion() semver.Version {
-	return semver.Version{
-		Major: 0,
-		Minor: 7,
-		Patch: 1,
-	}
+	ver, _ := semver.Parse("0.7.1")
+	return ver
 }
 
 func main() {
@@ -105,7 +101,7 @@ func main() {
 	flag.Parse()
 
 	if *flagVer {
-		fmt.Printf("houndd v%s", getVersion())
+		fmt.Printf("houndd v%s\n", getVersion())
 		os.Exit(0)
 	}
 
