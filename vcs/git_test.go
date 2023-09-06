@@ -83,3 +83,22 @@ func TestTargetRef(t *testing.T) {
 		})
 	}
 }
+
+// Tests that the git driver is able to parse its config.
+func TestGitConfig(t *testing.T) {
+	cfg := `{"username" : "git_user", "password" : "git_pass"}`
+
+	d, err := New("git", []byte(cfg))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	git := d.Driver.(*GitDriver)
+	if git.Username != "git_user" {
+		t.Fatalf("expected username of \"git_user\", got %s", git.Username)
+	}
+
+	if git.Password != "git_pass" {
+		t.Fatalf("expected password of \"git_pass\", got %s", git.Password)
+	}
+}
