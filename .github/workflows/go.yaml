@@ -3,6 +3,8 @@ on:
   # Run CI when pushing to main
   push:
     branches: [ main ]
+    tags:
+      - v*.*.*
   # Run CI for PRs to main and staging
   pull_request:
     branches: [ main ]
@@ -25,6 +27,7 @@ jobs:
   docker-build:
     name: Create docker image
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2.3.4
       - name: Prepare
