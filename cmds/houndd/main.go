@@ -84,7 +84,7 @@ func unregisterShutdownSignal(shutdownCh chan os.Signal) {
 }
 
 func getVersion() semver.Version {
-	ver, _ := semver.Parse("0.8.1")
+	ver, _ := semver.Parse("0.8.2")
 	return ver
 }
 
