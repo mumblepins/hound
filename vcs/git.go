@@ -27,6 +27,7 @@ type GitDriver struct {
 	Ref           string `json:"ref"`
 	Username      string `json:"username"`
 	Password      string `json:"password"`
+	PullDepth     int    `json:"pull-depth"`
 	refDetetector refDetetector
 }
 
@@ -47,7 +48,9 @@ func newGit(b []byte) (Driver, error) {
 	}
 
 	d.refDetetector = &headBranchDetector{}
-
+	if d.PullDepth == 0 {
+		d.PullDepth = 1
+	}
 	return &d, nil
 }
 
@@ -94,14 +97,17 @@ func run(desc, dir, cmd string, args ...string) (string, error) {
 func (g *GitDriver) Pull(dir string) (string, error) {
 	targetRef := g.targetRef(dir)
 
+	args := []string{"fetch", "--prune", "--no-tags"}
+	args = g.addDepth(args)
+	args = append(
+		args, "origin",
+		fmt.Sprintf("+%s:remotes/origin/%s", targetRef, targetRef),
+	)
+
 	if _, err := run("git fetch", dir,
 		"git",
-		"fetch",
-		"--prune",
-		"--no-tags",
-		"--depth", "1",
-		"origin",
-		fmt.Sprintf("+%s:remotes/origin/%s", targetRef, targetRef)); err != nil {
+		args...,
+	); err != nil {
 		return "", err
 	}
 
@@ -114,6 +120,13 @@ func (g *GitDriver) Pull(dir string) (string, error) {
 	}
 
 	return g.HeadRev(dir)
+}
+
+func (g *GitDriver) addDepth(args []string) []string {
+	if g.PullDepth > 0 {
+		args = append(args, "--depth", fmt.Sprintf("%d", g.PullDepth))
+	}
+	return args
 }
 
 func (g *GitDriver) targetRef(dir string) string {
@@ -157,12 +170,12 @@ func (g *GitDriver) Clone(dir, url string) (string, error) {
 		return "", err
 	}
 	url = newUrl
-	cmd := exec.Command(
-		"git",
-		"clone",
-		"--depth", "1",
-		url,
-		rep)
+
+	args := []string{"clone"}
+	args = g.addDepth(args)
+	args = append(args, url, rep)
+
+	cmd := exec.Command("git", args...)
 	cmd.Dir = par
 	out, err := cmd.CombinedOutput()
 	if err != nil {
